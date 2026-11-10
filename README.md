@@ -23,3 +23,7 @@ To start a new piece, ask the agent for it, for example: "New artwork: a fox cur
 | Olive branch | Dusk meadow | Koi pond |
 | --- | --- | --- |
 | ![Olive branch](output/olive-branch/preview.png) | ![Dusk meadow](output/dusk-meadow/preview.png) | ![Koi pond](output/koi-pond/preview.png) |
+
+## License
+
+MIT, see `LICENSE`. Two glyph files keep their own terms: `artworks/cherry-blossom/sakura-glyph.svg` is outlined from the Yuji Syuku font and stays under the SIL Open Font License 1.1, and the seal-script SVGs are built from public-domain Wikimedia Commons glyphs. Each file names its source.
