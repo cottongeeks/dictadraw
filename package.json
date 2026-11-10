@@ -1,0 +1,19 @@
+{
+  "name": "dictadraw",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "art:render": "tsx src/render.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "jsdom": "^31.0.0",
+    "paper": "^0.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
