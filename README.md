@@ -23,6 +23,7 @@ Everything runs headless in Node: Paper.js draws the geometry (with jsdom, which
 ## Use
 
 ```sh
+nix develop                                      # Node 26, pnpm 12, ImageMagick (or `direnv allow`)
 pnpm install
 pnpm art:render olive-branch                     # SVG + previews in output/olive-branch/
 pnpm art:render olive-branch --crop 330,620,360,360   # also a zoomed detail
