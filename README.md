@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart LR
-  scene["scene.ts"] --> paper["Paper.js"] --> svg["SVG"] --> resvg["resvg"] --> png["PNG"] --> look["agent looks"]
+  user(["User dictates"]) --> write["agent writes"] --> scene["scene.ts"] --> paper["Paper.js"] --> svg["SVG"] --> resvg["resvg"] --> png["PNG"] --> look["agent looks"]
   look -- revises --> scene
 ```
 
