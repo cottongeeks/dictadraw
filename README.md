@@ -1,6 +1,8 @@
 # dictadraw
 
-Dictate an illustration in chat; a coding agent writes it as TypeScript, renders it, looks at the result, and revises. The output is an editable SVG with named layers and groups.
+* dictate an illustration in chat
+* a coding agent writes it as TypeScript, renders it, looks at the result, and revises.
+* the output is an editable SVG with named layers and groups.
 
 ```mermaid
 flowchart LR
@@ -29,4 +31,4 @@ pnpm art:render olive-branch                     # SVG + previews in output/oliv
 pnpm art:render olive-branch --crop 330,620,360,360   # also a zoomed detail
 ```
 
-To start a new piece, ask the agent for it, for example: "New artwork: a fox curled up asleep under falling maple leaves, warm autumn palette." It writes `artworks/<name>/brief.md` and `scene.ts`, renders, and iterates. Then give feedback the same way: "Make the leaves smaller and scatter more of them on the left; keep the fox as is."
+To start a new piece, ask the agent for it, for example: _"New artwork: a fox curled up asleep under falling maple leaves, warm autumn palette."_ It writes `artworks/<name>/brief.md` and `scene.ts`, renders, and iterates. Then give feedback the same way: _"Make the leaves smaller and scatter more of them on the left; keep the fox as is."_
