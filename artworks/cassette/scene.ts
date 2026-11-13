@@ -52,6 +52,7 @@ export default {
   width: W,
   height: H,
   seed: 'cassette',
+  transparent: true,
   draw({ random }) {
     shell(random)
     relief()

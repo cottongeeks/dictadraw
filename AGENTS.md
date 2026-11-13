@@ -11,7 +11,7 @@ scene.ts → Paper.js → SVG → resvg → PNG → you look → scene.ts
 ## Layout
 
 - `artworks/<name>/brief.md`: subject, style, palette, composition, and what the user has locked.
-- `artworks/<name>/scene.ts`: the source of truth. Its default export is `{ width, height, seed, draw } satisfies Artwork`.
+- `artworks/<name>/scene.ts`: the source of truth. Its default export is `{ width, height, seed, draw } satisfies Artwork`. Add `transparent: true` for a shaped piece whose PNG previews should leave undrawn canvas transparent instead of white.
 - `artworks/<name>/<variation>.ts`: alternative scenes while the user chooses a direction. Each renders to `output/<name>/<variation>/`.
 - `artworks/<name>/references/`: reference images from the user, if any. Look at them.
 - `src/organic.ts`: the drawing vocabulary. `src/random.ts`: seeded randomness.

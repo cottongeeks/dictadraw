@@ -9,6 +9,8 @@ export interface Artwork {
   height: number
   /** Changing it rerolls every random stream at once. */
   seed?: string | number
+  /** PNG previews keep undrawn canvas transparent instead of white: for shaped pieces, such as a cassette's rounded corners. */
+  transparent?: boolean
   /** Builds the scene into the current Paper.js project. */
   draw(context: DrawContext): void
 }

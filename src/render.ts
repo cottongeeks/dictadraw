@@ -68,7 +68,7 @@ function exportRegion(region: paper.Rectangle): string {
 
 function rasterize(svg: string, region: paper.Rectangle, size: number): Buffer {
   const fitTo = region.width >= region.height ? { mode: 'width' as const, value: size } : { mode: 'height' as const, value: size }
-  return new Resvg(svg, { fitTo, background: '#ffffff' }).render().asPng()
+  return new Resvg(svg, { fitTo, background: art.transparent ? undefined : '#ffffff' }).render().asPng()
 }
 
 function write(file: string, data: string | Buffer): string {
