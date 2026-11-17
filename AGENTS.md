@@ -50,6 +50,7 @@ scene.ts → Paper.js → SVG → resvg → PNG → you look → scene.ts
 - Keep what the user approved. When they approve something ("keep the composition"), add it under Locked in `brief.md` and don't change it without asking.
 - When a shape recurs across artworks, add it to `src/organic.ts` as a primitive with named parameters instead of copying code between scenes.
 - When the user approves a version, commit its `scene.ts`, `brief.md`, and `output/<name>/` together, so they can ask for an earlier version back.
+- `README.md` is for people using dictadraw. Document repository infrastructure (CI, workflows, upgrade automation, GitHub setup, tooling internals) in `AGENTS.md` instead, and keep it out of the README.
 
 ## Vocabulary
 
@@ -70,3 +71,64 @@ Every primitive accepts Paper.js look props (`fillColor`, `strokeColor`, `stroke
 The examples in `artworks/` show these in use: `olive-branch` (leaves along a stem, botanical shading), `dusk-meadow` (layered ridges, merged canopy, grass), `koi-pond` (bodies from tapered strokes, patches clipped with `intersect`, notched pads).
 
 Use Paper.js directly (`import paper from 'paper'`) for everything else: custom Bézier paths, boolean operations (`unite`, `subtract`, `intersect`), clip masks, transforms. Angles are in degrees and clockwise, with 0 pointing right and -90 up; y grows downward. `new paper.Layer({ name })` makes that layer active, so later items go into it.
+
+## CI and dependency upgrades
+
+| Workflow             | Trigger                    | Effect                                                                   |
+| -------------------- | -------------------------- | ------------------------------------------------------------------------ |
+| CI                   | Every PR and push to `main` | `nix flake check`, type-check, re-render every artwork against `output/` |
+| Dependency Upgrades  | Mondays                    | npm PRs: within-major (`deps/upgrades`) and majors (`deps/npm-majors`)   |
+| Toolchain Upgrades   | Wednesdays                 | `nix flake update` PR (`deps/toolchains`): Node 26, pnpm, CI tools       |
+| Dependabot Auto-merge | Dependabot PRs            | Enables auto-merge on non-major updates                                  |
+
+CI installs its tools from the flake's `ci` package, the same versions `nix develop` uses. Renders are deterministic, so CI fails when any committed file in `output/` would change. When a change to `src/` or a dependency alters a render, re-render the affected artworks and commit their `output/` with that change; an upgrade PR that alters an approved artwork waits for that on its branch.
+
+| Source                                   | Auto-merges | Notes                                                        |
+| ---------------------------------------- | ----------- | ------------------------------------------------------------ |
+| `deps/upgrades` (npm within major)       | Yes         | Versions must be 3 days old; see `.github/scripts/ncurc.cjs` |
+| `deps/toolchains` (flake inputs)         | Yes         | Moving to a new Node major is a manual edit in `flake.nix`   |
+| Dependabot GitHub Actions and security   | Non-major   | Actions are grouped weekly on Thursdays with a 3-day cooldown |
+| `deps/npm-majors`                        | No          | Opened even when the build breaks; fix on the branch, then merge |
+
+Dependabot opens only security PRs for npm, since Dependency Upgrades owns routine bumps. A PR that fails CI stays open, and the next weekly run updates the same branch.
+
+### One-time repository setup
+
+Upgrade PRs are opened and merged with a GitHub App token, because PRs made with `GITHUB_TOKEN` trigger no workflows, so CI would never run on them.
+
+1. Create a GitHub App owned by `cottongeeks` with webhooks off and repository permissions Contents, Pull requests, and Workflows set to read and write. Install it on this repository, and generate a private key.
+2. Store its client ID and key as both Actions and Dependabot secrets. Workflows that Dependabot triggers can read only Dependabot secrets.
+
+   ```sh
+   for app in actions dependabot; do
+     gh secret set DEPS_APP_CLIENT_ID -R cottongeeks/dictadraw --app "$app" --body "<client id>"
+     gh secret set DEPS_APP_PRIVATE_KEY -R cottongeeks/dictadraw --app "$app" < path/to/private-key.pem
+   done
+   ```
+
+3. Allow auto-merge and delete merged branches:
+
+   ```sh
+   gh repo edit cottongeeks/dictadraw --enable-auto-merge --delete-branch-on-merge
+   ```
+
+4. Once CI has run on `main`, require its `checks` job on `main`. Repository admins bypass the rule, so direct pushes still work. Without a required check, auto-merge would merge before CI finishes.
+
+   ```sh
+   gh api repos/cottongeeks/dictadraw/rulesets --method POST --input - <<'JSON'
+   {
+     "name": "require-ci",
+     "target": "branch",
+     "enforcement": "active",
+     "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+     "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }],
+     "rules": [{
+       "type": "required_status_checks",
+       "parameters": {
+         "strict_required_status_checks_policy": false,
+         "required_status_checks": [{ "context": "checks", "integration_id": 15368 }]
+       }
+     }]
+   }
+   JSON
+   ```
