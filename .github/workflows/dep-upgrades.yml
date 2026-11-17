@@ -1,0 +1,51 @@
+name: Dependency Upgrades
+
+on:
+  schedule:
+    - cron: "22 10 * * 1"
+  workflow_dispatch:
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: minor
+            branch: deps/upgrades
+            title: "deps: upgrade npm dependencies"
+            automerge: "true"
+          - target: latest
+            branch: deps/npm-majors
+            title: "deps: upgrade npm major versions"
+            automerge: "false"
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-tools
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for upgrades and apply
+        id: upgrades
+        env:
+          NCU_TARGET: ${{ matrix.target }}
+        run: .github/scripts/dep-upgrades.sh
+
+      # Every upgrade opens a PR, even one that breaks the build or changes a
+      # render: the required CI check on the PR shows what needs fixing and
+      # holds auto-merge until it passes.
+      - name: Open pull request
+        if: steps.upgrades.outputs.has_updates == 'true'
+        uses: ./.github/actions/upgrade-pr
+        with:
+          client-id: ${{ secrets.DEPS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DEPS_APP_PRIVATE_KEY }}
+          branch: ${{ matrix.branch }}
+          title: ${{ matrix.title }}
+          body: ${{ steps.upgrades.outputs.body }}
+          automerge: ${{ matrix.automerge }}

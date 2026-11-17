@@ -1,0 +1,19 @@
+name: CI
+
+# Required by the main ruleset, so it runs on every PR: a required check that a
+# path filter skips never reports, and the PR can never merge.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-tools
+      - uses: ./.github/actions/checks

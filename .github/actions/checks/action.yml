@@ -1,0 +1,21 @@
+name: Checks
+description: Check the flake, type-check, and re-render every artwork against its committed output (checkout and setup-tools must happen before calling this action)
+
+runs:
+  using: composite
+  steps:
+    - name: Check flake
+      shell: bash
+      run: nix flake check
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Type-check
+      shell: bash
+      run: pnpm typecheck
+
+    - name: Render artworks
+      shell: bash
+      run: .github/scripts/render-all.sh

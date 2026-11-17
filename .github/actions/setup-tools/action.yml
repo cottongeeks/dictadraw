@@ -1,0 +1,28 @@
+name: Set up pinned CI tools
+description: Install the flake's CI toolchain and restore the Nix and pnpm caches
+
+runs:
+  using: composite
+  steps:
+    - uses: nixbuild/nix-quick-install-action@v35
+      with:
+        nix_conf: |
+          experimental-features = nix-command flakes
+          keep-env-derivations = true
+          keep-outputs = true
+
+    - uses: nix-community/cache-nix-action@v7
+      with:
+        primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('flake.nix', 'flake.lock') }}
+        restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}-
+
+    - uses: actions/cache@v5
+      with:
+        path: ~/.local/share/pnpm/store
+        key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('flake.nix', 'flake.lock', 'pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ github.job }}-
+
+    - name: Activate toolchain
+      shell: bash
+      run: .github/scripts/setup-ci.sh
